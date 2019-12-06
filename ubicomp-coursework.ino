@@ -17,6 +17,7 @@ const int CS_PIN = 11;
 const int CLK_PIN = 10;
 int pirPin = 2;
 int motionDetected = 0;
+int iDisplayFrame = 0;
 
 const uint64_t IMAGES[] = {
   0x0000000000000000,
@@ -63,7 +64,6 @@ void setup() {
   pinMode(pirPin, INPUT_PULLUP);
 }
 
-int i = 0;
 void loop() {
 
   int pirValue = digitalRead(pirPin);
@@ -90,8 +90,8 @@ void loop() {
 
       displayImage(IMAGES[i]);
 
-      if (++i >= IMAGES_LEN ) {
-        i = 0;
+      if (++iDisplayFrame >= IMAGES_LEN ) {
+        iDisplayFrame = 0;
       }
 
       if(analogRead(A0) > 1) {
