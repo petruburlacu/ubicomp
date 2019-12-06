@@ -100,11 +100,11 @@ void loop() {
       i = 0;
     }
     if(analogRead(A0) > 1) {
-      tone(14, analogRead(A0), 50);
+      tone(14, analogRead(A0), 200);
     }
     
   //Wait for a bit to keep serial data from saturating
-  delay(50);
+  delay(1000);
   }
 
 }
