@@ -137,7 +137,7 @@ void loop() {
                 i = 0;
               }
     
-        if(analogRead(A0) < 350) {
+        if(analogRead(A0) > 1) {
           tone(14, analogRead(A0), 50);
           
         }
@@ -148,7 +148,7 @@ void loop() {
        }
     
   //Wait for a bit to keep serial data from saturating
-  delay(60);
+  delay(500);
   }
 }
 
