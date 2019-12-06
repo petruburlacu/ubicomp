@@ -1,8 +1,24 @@
 #include <LedControl.h>
+#include <Wire.h>
+#include "ThingSpeak.h"
+#include <SPI.h>
+#include <WiFi101.h>
+
+WiFiClient client;
+char ssid[] = "PetersPhone";        //  your network SSID (name)
+char pass[] = "00000000";   //  the network password
+
+
+// Add yourThingSpeak channel information here
+unsigned long myChannelNumber = 928770;
+const char * myWriteAPIKey = "AXU7PDC2DAXHAZSX";
+
+
 const int DIN_PIN = 12;
 const int CS_PIN = 11;
 const int CLK_PIN = 10;
 int pirPin = 2;
+int motionDetected = 0;
 
 const uint64_t IMAGES[] = {
   0x0000000000000000,
@@ -23,9 +39,21 @@ const uint64_t IMAGES[] = {
 const int IMAGES_LEN = sizeof(IMAGES)/8;
 
 LedControl display = LedControl(DIN_PIN, CLK_PIN, CS_PIN);
+
 void setup() {
   // initialize the serial communication:
   Serial.begin(9600);
+
+  // Initialise the ThingSpeak library
+  ThingSpeak.begin(client);
+  
+  // Connects to the WiFi
+  WiFi.begin(ssid, pass);
+  delay(15000);   // Waits 15 seconds to confirm connection and finish calibrating the motion sensor
+  
+  // Print WiFi strength information
+  printCurrentNet();
+  
   pinMode(8, INPUT); // Setup for leads off detection LO +
   pinMode(9, INPUT); // Setup for leads off detection LO -
   display.clearDisplay(0);
@@ -48,6 +76,14 @@ void loop() {
   int pirValue = digitalRead(pirPin);
     if (pirValue == LOW)
   {
+    motionDetected ++;
+   int frequency = analogRead(A0);
+
+    // Write the value of 'motionDetected' to ThingSpeak (0 or 1)
+    ThingSpeak.setField(1, motionDetected);
+    ThingSpeak.setField(2, frequency);
+    ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+    
      //If the value in digital pin 2 is LOW
      //something triggered the motion sensor
     Serial.println("Motion Detected");
@@ -71,4 +107,12 @@ void loop() {
   delay(50);
   }
 
+}
+
+void printCurrentNet() {
+  // Print the WiFi signal strength:
+  long rssi = WiFi.RSSI();
+  Serial.print("Signal strength (RSSI): ");
+  Serial.print(rssi);
+  Serial.println(" dBm");
 }
