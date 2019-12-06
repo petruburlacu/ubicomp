@@ -8,11 +8,9 @@ WiFiClient client;
 char ssid[] = "PetersPhone";        //  your network SSID (name)
 char pass[] = "00000000";   //  the network password
 
-
 // Add yourThingSpeak channel information here
 unsigned long myChannelNumber = 928770;
 const char * myWriteAPIKey = "AXU7PDC2DAXHAZSX";
-
 
 const int DIN_PIN = 12;
 const int CS_PIN = 11;
@@ -36,6 +34,7 @@ const uint64_t IMAGES[] = {
   0x00080c4b28180800,
   0x00080ccb28180800
 };
+
 const int IMAGES_LEN = sizeof(IMAGES)/8;
 
 LedControl display = LedControl(DIN_PIN, CLK_PIN, CS_PIN);
@@ -63,6 +62,47 @@ void setup() {
   // PIR Motion Sensor to digital pin 2
   pinMode(pirPin, INPUT_PULLUP);
 }
+
+int i = 0;
+void loop() {
+
+  int pirValue = digitalRead(pirPin);
+
+    if (pirValue == LOW) {
+      motionDetected ++;
+      int frequency = analogRead(A0);
+
+      // Write the value of 'motionDetected' to ThingSpeak (0 or 1)
+      ThingSpeak.setField(1, motionDetected);
+      ThingSpeak.setField(2, frequency);
+      ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+    
+      //If the value in digital pin 2 is LOW
+      //something triggered the motion sensor
+      Serial.println("Motion Detected");
+    
+      if((digitalRead(8) == 1)||(digitalRead(9) == 1)) {
+        Serial.println('!');
+      } else {
+        //send the value of analog input 0:
+        Serial.println(analogRead(A0));
+      }
+
+      displayImage(IMAGES[i]);
+
+      if (++i >= IMAGES_LEN ) {
+        i = 0;
+      }
+
+      if(analogRead(A0) > 1) {
+        tone(14, analogRead(A0), 200);
+      }
+    
+    //Wait for a bit to keep serial data from saturating
+    delay(1000);
+  }
+}
+
 void displayImage(uint64_t image) {
   for (int i = 0; i < 8; i++) {
     byte row = (image >> i * 8) & 0xFF;
@@ -70,43 +110,6 @@ void displayImage(uint64_t image) {
       display.setLed(0, i, j, bitRead(row, j));
     }
   }
-}
-int i = 0;
-void loop() {
-  int pirValue = digitalRead(pirPin);
-    if (pirValue == LOW)
-  {
-    motionDetected ++;
-   int frequency = analogRead(A0);
-
-    // Write the value of 'motionDetected' to ThingSpeak (0 or 1)
-    ThingSpeak.setField(1, motionDetected);
-    ThingSpeak.setField(2, frequency);
-    ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
-    
-     //If the value in digital pin 2 is LOW
-     //something triggered the motion sensor
-    Serial.println("Motion Detected");
-    
-      if((digitalRead(8) == 1)||(digitalRead(9) == 1)){
-    Serial.println('!');
-  }
-  else{
-     //send the value of analog input 0:
-      Serial.println(analogRead(A0));
-    }
-    displayImage(IMAGES[i]);
-    if (++i >= IMAGES_LEN ) {
-      i = 0;
-    }
-    if(analogRead(A0) > 1) {
-      tone(14, analogRead(A0), 200);
-    }
-    
-  //Wait for a bit to keep serial data from saturating
-  delay(1000);
-  }
-
 }
 
 void printCurrentNet() {
