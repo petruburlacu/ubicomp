@@ -1,6 +1,6 @@
 ---
 title: UBICOMP
-author: Petru-Marian Burlacu, Peter Philips
+author: Petru-Marian Burlacu, Peter Phillips
 date: today
 ---
 
