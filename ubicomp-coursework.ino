@@ -88,7 +88,7 @@ void loop() {
         Serial.println(analogRead(A0));
       }
 
-      displayImage(IMAGES[i]);
+      displayImage(IMAGES[iDisplayFrame]);
 
       if (++iDisplayFrame >= IMAGES_LEN ) {
         iDisplayFrame = 0;
